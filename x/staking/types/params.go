@@ -32,17 +32,26 @@ const (
 )
 
 // DefaultMinCommissionRate is set to 0%
-var DefaultMinCommissionRate = math.LegacyZeroDec()
+var DefaultMinCommissionRate = math.LegacyNewDecWithPrec(5, 2)
+
+var DefaultCommissionThresholdRate = math.LegacyNewDecWithPrec(1, 2)
+
+var DefaultMaxCommissionRate = math.LegacyNewDecWithPrec(20, 2)
+
+var DefaultCommissionRateMultiplier = math.LegacyMustNewDecFromStr("1")
 
 // NewParams creates a new Params instance
-func NewParams(unbondingTime time.Duration, maxValidators, maxEntries, historicalEntries uint32, bondDenom string, minCommissionRate math.LegacyDec) Params {
+func NewParams(unbondingTime time.Duration, maxValidators, maxEntries, historicalEntries uint32, bondDenom string, minCommissionRate math.LegacyDec, commissionThresholdRate math.LegacyDec, maxCommissionRate math.LegacyDec, commissionRateMultiplier math.LegacyDec) Params {
 	return Params{
-		UnbondingTime:     unbondingTime,
-		MaxValidators:     maxValidators,
-		MaxEntries:        maxEntries,
-		HistoricalEntries: historicalEntries,
-		BondDenom:         bondDenom,
-		MinCommissionRate: minCommissionRate,
+		UnbondingTime:            unbondingTime,
+		MaxValidators:            maxValidators,
+		MaxEntries:               maxEntries,
+		HistoricalEntries:        historicalEntries,
+		BondDenom:                bondDenom,
+		MinCommissionRate:        minCommissionRate,
+		CommissionThresholdRate:  commissionThresholdRate,
+		MaxCommissionRate:        maxCommissionRate,
+		CommissionRateMultiplier: commissionRateMultiplier,
 	}
 }
 
@@ -55,6 +64,9 @@ func DefaultParams() Params {
 		DefaultHistoricalEntries,
 		sdk.DefaultBondDenom,
 		DefaultMinCommissionRate,
+		DefaultCommissionThresholdRate,
+		DefaultMaxCommissionRate,
+		DefaultCommissionRateMultiplier,
 	)
 }
 
@@ -101,6 +113,18 @@ func (p Params) Validate() error {
 	}
 
 	if err := validateHistoricalEntries(p.HistoricalEntries); err != nil {
+		return err
+	}
+
+	if err := validateCommissionThresholdRate(p.CommissionThresholdRate); err != nil {
+		return err
+	}
+
+	if err := validateMaxCommissionRate(p.MaxCommissionRate); err != nil {
+		return err
+	}
+
+	if err := validateCommissionRateMultiplier(p.CommissionRateMultiplier); err != nil {
 		return err
 	}
 
@@ -199,6 +223,63 @@ func validateMinCommissionRate(i any) error {
 	}
 	if v.GT(math.LegacyOneDec()) {
 		return fmt.Errorf("minimum commission rate cannot be greater than 100%%: %s", v)
+	}
+
+	return nil
+}
+
+func validateCommissionThresholdRate(i any) error {
+	v, ok := i.(math.LegacyDec)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v.IsNil() {
+		return fmt.Errorf("commission threshold rate cannot be nil: %s", v)
+	}
+	if v.IsNegative() {
+		return fmt.Errorf("commission threshold rate cannot be negative: %s", v)
+	}
+	if v.GT(math.LegacyOneDec()) {
+		return fmt.Errorf("commission threshold rate cannot be greater than 100%%: %s", v)
+	}
+
+	return nil
+}
+
+func validateMaxCommissionRate(i any) error {
+	v, ok := i.(math.LegacyDec)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v.IsNil() {
+		return fmt.Errorf("maximum commission rate cannot be nil: %s", v)
+	}
+	if v.IsNegative() {
+		return fmt.Errorf("maximum commission rate cannot be negative: %s", v)
+	}
+	if v.GT(math.LegacyOneDec()) {
+		return fmt.Errorf("maximum commission rate cannot be greater than 100%%: %s", v)
+	}
+
+	return nil
+}
+
+func validateCommissionRateMultiplier(i any) error {
+	v, ok := i.(math.LegacyDec)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v.IsNil() {
+		return fmt.Errorf("commission rate multiplier cannot be nil: %s", v)
+	}
+	if v.IsNegative() {
+		return fmt.Errorf("commission rate multiplier cannot be negative: %s", v)
+	}
+	if v.Equal(math.LegacyZeroDec()) {
+		return fmt.Errorf("commission rate multiplier cannot be equal zero: %s", v)
 	}
 
 	return nil
