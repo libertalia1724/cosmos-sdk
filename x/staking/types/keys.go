@@ -57,6 +57,8 @@ var (
 
 	DelegationByValIndexKey = []byte{0x71} // key for delegations by a validator
 
+	PreviousCommissionRateKey = []byte{0x72}
+
 	// NOTE: keys in range 0x81–0x87 were previously used in liquid staking forks of the staking module.
 	// Module developers MUST NOT use these keys and MUST consider them "reserved".
 )
@@ -424,4 +426,8 @@ func GetHistoricalInfoKey(height int64) []byte {
 	heightBytes := make([]byte, 8)
 	binary.BigEndian.PutUint64(heightBytes, uint64(height))
 	return append(HistoricalInfoKey, heightBytes...)
+}
+
+func GetPreviousCommissionRateKey(valAddr sdk.ValAddress) []byte {
+	return append(PreviousCommissionRateKey, valAddr...)
 }

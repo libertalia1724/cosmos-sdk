@@ -7,6 +7,8 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	"github.com/cosmos/cosmos-sdk/x/staking/types"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // BeginBlocker will persist the current header and validator set as a historical entry
@@ -18,6 +20,12 @@ func (k *Keeper) BeginBlocker(ctx context.Context) error {
 
 // EndBlocker called at every block, update validator set
 func (k *Keeper) EndBlocker(ctx context.Context) ([]abci.ValidatorUpdate, error) {
+	if k.isEpochEnd(sdk.UnwrapSDKContext(ctx), BlocksPerWeek) {
+		if err := k.UpdateAllValidatorCommissions(sdk.UnwrapSDKContext(ctx)); err != nil {
+			return nil, err
+		}
+	}
+
 	defer telemetry.ModuleMeasureSince(types.ModuleName, telemetry.Now(), telemetry.MetricKeyEndBlocker)
 	return k.BlockValidatorUpdates(ctx)
 }
