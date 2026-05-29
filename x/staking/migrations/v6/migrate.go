@@ -31,6 +31,9 @@ func migrateParams(ctx sdk.Context, store storetypes.KVStore, cdc codec.BinaryCo
 		return err
 	}
 
+	if params.MinCommissionRate.IsNil() {
+		params.MinCommissionRate = types.DefaultMinCommissionRate
+	}
 	if params.CommissionThresholdRate.IsNil() {
 		params.CommissionThresholdRate = types.DefaultCommissionThresholdRate
 	}
