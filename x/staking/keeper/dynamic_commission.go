@@ -29,10 +29,10 @@ func (k *Keeper) GetValidatorVotingPowerPercent(ctx sdk.Context, valAddr sdk.Val
 	if err != nil {
 		return math.LegacyZeroDec(), err
 	}
-	// validator'ın power'ı
+	// validator's power
 	validatorPower := math.LegacyNewDecFromInt(validator.GetTokens())
 
-	// toplam bonded tokens
+	// total bonded tokens
 
 	totalBonded, err := k.TotalBondedTokens(ctx)
 	if err != nil {
@@ -45,7 +45,7 @@ func (k *Keeper) GetValidatorVotingPowerPercent(ctx sdk.Context, valAddr sdk.Val
 		return math.LegacyZeroDec(), nil
 	}
 
-	// yüzde: validatorPower / totalPower
+	// percent = validatorPower / totalPower
 	return validatorPower.Quo(totalPower), nil
 }
 
