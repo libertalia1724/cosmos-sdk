@@ -38,7 +38,7 @@ var DefaultCommissionThresholdRate = math.LegacyNewDecWithPrec(1, 2)
 
 var DefaultMaxCommissionRate = math.LegacyNewDecWithPrec(20, 2)
 
-var DefaultCommissionRateMultiplier = math.LegacyMustNewDecFromStr("1")
+var DefaultCommissionRateMultiplier = math.LegacyOneDec()
 
 // NewParams creates a new Params instance
 func NewParams(unbondingTime time.Duration, maxValidators, maxEntries, historicalEntries uint32, bondDenom string, minCommissionRate math.LegacyDec, commissionThresholdRate math.LegacyDec, maxCommissionRate math.LegacyDec, commissionRateMultiplier math.LegacyDec) Params {
